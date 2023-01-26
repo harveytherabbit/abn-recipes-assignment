@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.compilit</groupId>
+    <artifactId>recipes</artifactId>
+    <version>${revision}</version>
+  </parent>
+
+  <artifactId>recipe-application</artifactId>
+  <version>${revision}</version>
+
+
+  <dependencies>
+    <!-- Internal dependencies -->
+    <dependency>
+      <groupId>com.compilit</groupId>
+      <artifactId>recipe-web-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.compilit</groupId>
+      <artifactId>recipe-persistence</artifactId>
+    </dependency>
+
+    <!-- Spring dependencies -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-webflux</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- Third party dependencies -->
+    <dependency>
+      <artifactId>postgresql-embedded</artifactId>
+      <groupId>ru.yandex.qatools.embed</groupId>
+      <scope>test</scope>
+      <version>2.10</version>
+    </dependency>
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-resolver-dns-native-macos</artifactId>
+      <version>4.1.87.Final</version>
+      <classifier>osx-aarch_64</classifier>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>repackage</goal>
+            </goals>
+          </execution>
+        </executions>
+        <groupId>org.springframework.boot</groupId>
+      </plugin>
+    </plugins>
+  </build>
+</project>

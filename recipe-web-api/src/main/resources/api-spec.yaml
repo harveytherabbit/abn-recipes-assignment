@@ -1,0 +1,318 @@
+openapi: 3.0.3
+info:
+  title: Swagger Recipe application - OpenAPI 3.0
+  description: |-
+    A simple application to read/write recipes
+  termsOfService: http://swagger.io/terms/
+  contact:
+    email: info@compilit.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.11
+paths:
+  /recipe:
+    post:
+      summary: Add a new recipe to the application
+      description: Add a new recipe to the application
+      operationId: addRecipe
+      requestBody:
+        description: Create a new recipe in the application
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Recipe'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Recipe'
+        '400':
+          description: Invalid input
+      security:
+        - recipe_application_auth:
+            - write:recipes
+            - read:recipes
+    get:
+      summary: Finds Recipes by filters
+      description: Multiple status values can be provided with comma separated strings
+      operationId: findRecipesByQueryParams
+      parameters:
+        - name: ingredient
+          in: query
+          description: Ingredient that needs to be present in recipe
+          required: false
+          schema:
+            $ref: '#/components/schemas/Parameter'
+        - name: without_ingredient
+          in: query
+          description: Category that needs to be present in recipe
+          required: false
+          schema:
+            $ref: '#/components/schemas/Parameter'
+        - name: category
+          in: query
+          description: Category that needs to be present in recipe
+          required: false
+          schema:
+            $ref: '#/components/schemas/Parameter'
+        - name: instructions_containing
+          in: query
+          description: Instruction part that needs to be present in recipe instructions
+          required: false
+          schema:
+            $ref: '#/components/schemas/Parameter'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Recipe'
+        '400':
+          description: Invalid status value
+      security:
+        - recipe_application_auth:
+            - write:recipes
+            - read:recipes
+  /recipe/{recipeId}:
+    get:
+      summary: Find recipe by ID
+      description: Returns a single recipe
+      operationId: getRecipeById
+      parameters:
+        - name: recipeId
+          in: path
+          description: ID of recipe to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Recipe'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Recipe not found
+      security:
+        - api_key: []
+        - recipe_application_auth:
+            - write:recipes
+            - read:recipes
+    delete:
+      summary: Deletes a recipe
+      description: delete a recipe
+      operationId: deleteRecipe
+      parameters:
+        - name: api_key
+          in: header
+          description: ''
+          required: false
+          schema:
+            type: string
+        - name: recipeId
+          in: path
+          description: Recipe id to delete
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '400':
+          description: Invalid recipe value
+      security:
+        - recipe_application_auth:
+            - write:recipes
+            - read:recipes
+  /user:
+    post:
+      summary: Create user
+      description: This can only be done by the logged in user.
+      operationId: createUser
+      requestBody:
+        description: Created user object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        default:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+  /user/login:
+    get:
+      summary: Logs user into the system
+      description: ''
+      operationId: loginUser
+      parameters:
+        - name: username
+          in: query
+          description: The user name for login
+          required: false
+          schema:
+            type: string
+        - name: password
+          in: query
+          description: The password for login in clear text
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          headers:
+            X-Rate-Limit:
+              description: calls per hour allowed by the user
+              schema:
+                type: integer
+                format: int32
+            X-Expires-After:
+              description: date in UTC when token expires
+              schema:
+                type: string
+                format: date-time
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          description: Invalid username/password supplied
+  /user/logout:
+    get:
+      summary: Logs out current logged in user session
+      description: ''
+      operationId: logoutUser
+      parameters: []
+      responses:
+        default:
+          description: successful operation
+components:
+  schemas:
+    Ingredient:
+      type: object
+      properties:
+        name:
+          type: string
+          example: pepper
+        amount:
+          type: number
+          example: 100.00
+        unit:
+          enum:
+            - piece
+            - gram
+            - kilogram
+            - milliliter
+            - liter
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        name:
+          type: string
+          example: Vegan
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        username:
+          type: string
+          example: theUser
+        firstName:
+          type: string
+          example: John
+        lastName:
+          type: string
+          example: James
+        email:
+          type: string
+          example: john@email.com
+        password:
+          type: string
+          example: '12345'
+        phone:
+          type: string
+          example: '12345'
+        userStatus:
+          type: integer
+          description: User Status
+          format: int32
+          example: 1
+    Recipe:
+      required:
+        - name
+        - photoUrls
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        name:
+          type: string
+          example: boiled egg
+        instructions:
+          type: string
+          example: take 1 egg and boil it for 7 minutes
+        category:
+          $ref: '#/components/schemas/Category'
+        ingredients:
+          type: array
+          items:
+            $ref: '#/components/schemas/Ingredient'
+    ApiResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        type:
+          type: string
+        message:
+          type: string
+    Parameter:
+      type: object
+  requestBodies:
+    Recipe:
+      description: Recipe object that needs to be added to the application
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Recipe'
+  securitySchemes:
+    recipe_application_auth:
+      type: basicAuth
+      flows:
+        implicit:
+          authorizationUrl: https://recipe-application3.swagger.io/oauth/authorize
+          scopes:
+            write:recipes: modify recipes in your account
+            read:recipes: read your recipes
+      security:
+        - basicAuth: [ ]
+      responses:
+        200:
+          description: OK (successfully authenticated)
+    api_key:
+      type: apiKey
+      name: api_key
+      in: header
